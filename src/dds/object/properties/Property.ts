@@ -2,12 +2,16 @@ import type { IUnisonDecoder, IUnisonEncoder } from "../../../serialization/type
 
 export interface PropertyOptions<T>
 {
+  readonly?: boolean;
 }
 
 export class Property<T = any>
 {
+  public readonly readonly: boolean;
+
   public constructor(public readonly key: string, options: PropertyOptions<T>)
   {
+    this.readonly = options.readonly ?? false;
   }
 
   public restrictValue(value: T): T

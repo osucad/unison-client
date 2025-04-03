@@ -46,6 +46,9 @@ export class ObjectDDSKernel
 
   public setValue(property: Property, newValue: unknown)
   {
+    if (property.readonly)
+      throw new Error(`${property.key} is readonly`);
+
     Reflect.set(this.target, property.key, newValue);
 
     // TODO

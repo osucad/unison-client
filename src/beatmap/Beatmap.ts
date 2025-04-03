@@ -20,6 +20,6 @@ export class Beatmap extends ObjectDDS
     super(Beatmap.attributes, "/");
   }
 
-  @property.dds(() => BeatmapDifficulty)
+  @property.dds(() => BeatmapDifficulty, { readonly: true })
   public difficulty = new BeatmapDifficulty();
 }
