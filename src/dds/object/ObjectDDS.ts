@@ -1,3 +1,5 @@
+import type { DeltaChannel } from "../../runtime/DeltaChannel.ts";
+import type { UnisonRuntime } from "../../runtime/UnisonRuntime.ts";
 import type { IUnisonDecoder, IUnisonEncoder } from "../../serialization/types";
 import type { DDSAttributes } from "../DDSAttributes";
 import { DDS } from "../DDS";
@@ -20,6 +22,11 @@ export abstract class ObjectDDS extends DDS
     this._kernel = new ObjectDDSKernel(this);
 
     return toProxy(this);
+  }
+
+  public override attach(runtime: UnisonRuntime, deltas: DeltaChannel)
+  {
+    this._kernel.attach(runtime, deltas);
   }
 
   public createSummary(encoder: IUnisonEncoder): unknown

@@ -2,7 +2,10 @@ import type { DDS } from "../dds/DDS";
 import type { IObjectResolver } from "../serialization/IObjectResolver";
 import type { IDocumentSummary } from "./IDocumentSummary.ts";
 import type { DDSFactoryOrClass } from "./TypeRegistry.ts";
+import { EventEmitter } from "eventemitter3";
+import { HistoryManager } from "../history/HistoryManager.ts";
 import { UnisonEncoder } from "../serialization/UnisonEncoder.ts";
+import { DeltaChannel } from "./DeltaChannel.ts";
 import { DDSFactoryRegistry } from "./TypeRegistry.ts";
 
 export interface UnisonRuntimeOptions<T extends DDS>
@@ -11,16 +14,24 @@ export interface UnisonRuntimeOptions<T extends DDS>
   readonly ddsTypes: readonly DDSFactoryOrClass[];
 }
 
-export class UnisonRuntime<T extends DDS> implements IObjectResolver
+export class UnisonRuntime<T extends DDS = DDS>
+  extends EventEmitter<{
+    localOp(dds: DDS, op: unknown, undoOp: unknown): void;
+  }>
+  implements IObjectResolver
 {
   public readonly entryPoint: T;
 
-  private readonly _attachedObjects = new Map<string, DDS>();
+  public readonly history = new HistoryManager(this);
+
+  private readonly _channels = new Map<string, DeltaChannel>();
 
   private readonly _typeRegistry: DDSFactoryRegistry;
 
   public constructor(options: UnisonRuntimeOptions<T>)
   {
+    super();
+
     this.entryPoint = options.entryPoint;
     this._typeRegistry = new DDSFactoryRegistry(options.ddsTypes);
 
@@ -31,7 +42,12 @@ export class UnisonRuntime<T extends DDS> implements IObjectResolver
 
   public getObject(id: string): DDS | null
   {
-    return null;
+    return this._channels.get(id)?.dds ?? null;
+  }
+
+  public getChannel(id: string): DeltaChannel | null
+  {
+    return this._channels.get(id) ?? null;
   }
 
   private _attachRecursive(dds: DDS): void
@@ -59,20 +75,30 @@ export class UnisonRuntime<T extends DDS> implements IObjectResolver
     }
   }
 
-  private _attach(dds: DDS): void
+  private _attach(dds: DDS): boolean
   {
+    if (this._channels.has(dds.id!))
+      return false;
+
     dds.id ??= crypto.randomUUID();
-    this._attachedObjects.set(dds.id, dds);
+
+    const channel = new DeltaChannel(this, dds);
+
+    this._channels.set(dds.id, channel);
+
+    dds.attach(this, channel);
+
+    return true;
   }
 
   private _validate()
   {
-    for (const entry of [...this._attachedObjects.values()])
+    for (const entry of [...this._channels.values()])
     {
-      const factory = this._typeRegistry.getFactory(entry.attributes.type);
+      const factory = this._typeRegistry.getFactory(entry.dds.attributes.type);
 
       if (!factory)
-        throw new Error(`Could not find factory for type "${entry.attributes.type}"`);
+        throw new Error(`Could not find factory for type "${entry.dds.attributes.type}"`);
     }
   }
 
@@ -109,5 +135,10 @@ export class UnisonRuntime<T extends DDS> implements IObjectResolver
     }
 
     return summary;
+  }
+
+  public opSubmitted(dds: DDS, op: unknown, undoOp: unknown)
+  {
+    this.emit("localOp", dds, op, undoOp);
   }
 }

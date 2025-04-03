@@ -1,3 +1,5 @@
+import type { DeltaChannel } from "../runtime/DeltaChannel.ts";
+import type { UnisonRuntime } from "../runtime/UnisonRuntime.ts";
 import type { IUnisonDecoder, IUnisonEncoder } from "../serialization/types";
 import type { DDSAttributes } from "./DDSAttributes";
 
@@ -18,6 +20,8 @@ export abstract class DDS
   {
     return this._hasStaticId;
   }
+
+  public abstract attach(runtime: UnisonRuntime, deltas: DeltaChannel): void;
 
   // region serialization
   public abstract createSummary(encoder: IUnisonEncoder): unknown;
