@@ -1,5 +1,5 @@
 import type { IUnisonDecoder, IUnisonEncoder } from "../../serialization/types";
-import type { ObjectDDS, SharedObjectSummary } from "./ObjectDDS";
+import type { ObjectDDS, ObjectDDSSummary } from "./ObjectDDS";
 import type { Property } from "./properties/Property";
 import { getPropertyMetadata } from "./decorator";
 
@@ -12,11 +12,9 @@ export class ObjectDDSKernel
     this.properties = getPropertyMetadata(target);
   }
 
-  public createSummary(encoder: IUnisonEncoder): SharedObjectSummary
+  public createSummary(encoder: IUnisonEncoder): ObjectDDSSummary
   {
-    const summary: SharedObjectSummary = {
-      values: {},
-    };
+    const summary: ObjectDDSSummary = {};
 
     const { target, properties } = this;
 
@@ -24,19 +22,19 @@ export class ObjectDDSKernel
     {
       const value: unknown = Reflect.get(target, p.key);
 
-      summary.values[p.key] = p.encode(value, encoder);
+      summary[p.key] = p.encode(value, encoder);
     }
 
     return summary;
   }
 
-  public load(summary: SharedObjectSummary, decoder: IUnisonDecoder): void
+  public load(summary: ObjectDDSSummary, decoder: IUnisonDecoder): void
   {
     const { target, properties } = this;
 
     for (const p of properties)
     {
-      let value = summary.values[p.key];
+      let value = summary[p.key];
 
       value = p.decode(value, decoder);
 
@@ -49,8 +47,11 @@ export class ObjectDDSKernel
     if (property.readonly)
       throw new Error(`${property.key} is readonly`);
 
-    Reflect.set(this.target, property.key, newValue);
+    this._setValue(property, newValue);
+  }
 
-    // TODO
+  private _setValue(property: Property, newValue: unknown)
+  {
+    Reflect.set(this.target, property.key, newValue);
   }
 }

@@ -32,9 +32,7 @@ export class FloatProperty extends Property<number>
       value = this.max;
 
     if (this.precision !== undefined)
-    {
-      value = Math.round(value / this.precision) * this.precision;
-    }
+      value = Number.parseFloat(value.toString(this.precision));
 
     return value;
   }

@@ -1,13 +1,7 @@
 import type { DDSAttributes } from "../dds/DDSAttributes";
-import type { EncodedHandle } from "../serialization/types";
 import { property } from "../dds/object/decorator";
 import { ObjectDDS } from "../dds/object/ObjectDDS";
 import { BeatmapDifficulty } from "./BeatmapDifficulty";
-
-export interface IBeatmapSummary
-{
-  readonly difficulty: EncodedHandle;
-}
 
 export class Beatmap extends ObjectDDS
 {

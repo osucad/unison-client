@@ -13,19 +13,19 @@ export class BeatmapDifficulty extends ObjectDDS
     super(BeatmapDifficulty.attributes, "/difficulty");
   }
 
-  @property.float({ min: 0, max: 10, precision: 0.1 })
+  @property.float({ min: 0, max: 10, precision: 2 })
   public drainRate = 5;
 
-  @property.float({ min: 0, max: 10, precision: 0.1 })
+  @property.float({ min: 0, max: 10, precision: 2 })
   public circleSize = 5;
 
-  @property.float({ min: 0, max: 10, precision: 0.1 })
+  @property.float({ min: 0, max: 10, precision: 2 })
   public approachRate = 5;
 
-  @property.float({ min: 0, max: 10, precision: 0.1 })
+  @property.float({ min: 0, max: 10, precision: 2 })
   public overallDifficulty = 5;
 
-  @property.float({ min: 0.4, max: 3.6, precision: 0.1 })
+  @property.float({ min: 0.4, max: 3.6, precision: 2 })
   public sliderMultiplier = 1.4;
 
   @property.int({ min: 1, max: 4 })

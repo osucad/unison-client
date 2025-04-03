@@ -2,10 +2,10 @@ import type { IUnisonDecoder, IUnisonEncoder } from "../../serialization/types";
 import type { DDSAttributes } from "../DDSAttributes";
 import { DDS } from "../DDS";
 import { ObjectDDSKernel } from "./ObjectDDSKernel";
+import { toProxy } from "./proxy.ts";
 
-export interface SharedObjectSummary
+export interface ObjectDDSSummary extends Record<string, unknown>
 {
-  values: Record<string, unknown>;
 }
 
 export abstract class ObjectDDS extends DDS
@@ -18,6 +18,8 @@ export abstract class ObjectDDS extends DDS
     super(attributes, id);
 
     this._kernel = new ObjectDDSKernel(this);
+
+    return toProxy(this);
   }
 
   public createSummary(encoder: IUnisonEncoder): unknown
@@ -27,6 +29,6 @@ export abstract class ObjectDDS extends DDS
 
   public load(content: unknown, decoder: IUnisonDecoder): void
   {
-    this._kernel.load(content as SharedObjectSummary, decoder);
+    this._kernel.load(content as ObjectDDSSummary, decoder);
   }
 }

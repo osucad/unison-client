@@ -1,15 +1,28 @@
 import { Beatmap } from "./beatmap/Beatmap";
-import { UnisonDecoder } from "./serialization/UnisonDecoder";
-import { UnisonEncoder } from "./serialization/UnisonEncoder";
+import { BeatmapDifficulty } from "./beatmap/BeatmapDifficulty.ts";
+import { hydrateRuntime } from "./runtime/hydrate.ts";
+import { UnisonRuntime } from "./runtime/UnisonRuntime.ts";
+import { UnisonEncoder } from "./serialization/UnisonEncoder.ts";
 
-const beatmap = new Beatmap();
+const runtime = new UnisonRuntime({
+  entryPoint: new Beatmap(),
+  ddsTypes: [
+    Beatmap,
+    BeatmapDifficulty,
+  ],
+});
 
-const encoder = new UnisonEncoder();
+const beatmap = runtime.entryPoint;
 
-const summary = beatmap.difficulty.createSummary(encoder);
+beatmap.difficulty.approachRate = 9.22;
 
-beatmap.difficulty.approachRate = 10;
+const summary = runtime.createSummary();
 
-beatmap.difficulty.load(summary, new UnisonDecoder());
+console.log(summary);
 
-console.log(beatmap.difficulty);
+const runtime2 = hydrateRuntime(summary, [
+  Beatmap,
+  BeatmapDifficulty,
+]) as UnisonRuntime<Beatmap>;
+
+console.log(runtime2.entryPoint.difficulty.createSummary(new UnisonEncoder()));
