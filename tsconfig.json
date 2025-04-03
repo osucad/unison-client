@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "moduleDetection": "force",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noUncheckedSideEffectImports": true,
+    "experimentalDecorators": true,
+    "noImplicitOverride": true,
+    "strictFunctionTypes": true
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
