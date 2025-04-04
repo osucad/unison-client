@@ -13,7 +13,7 @@ export class Beatmap extends ObjectDDS
 
   public constructor()
   {
-    super(Beatmap.attributes, "/");
+    super(Beatmap.attributes, "/beatmap");
   }
 
   @property.dds(() => BeatmapMetadata, { readonly: true })
