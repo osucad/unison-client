@@ -1,4 +1,5 @@
-import type { DDSClass, DDSPropertyOptions } from "./properties/DDSProperty";
+import type { DDSClass } from "../DDSFactory";
+import type { DDSPropertyOptions } from "./properties/DDSProperty";
 import type { FloatPropertyOptions } from "./properties/FloatProperty";
 import type { IntPropertyOptions } from "./properties/IntProperty";
 import type { PropertyOptions } from "./properties/Property";
@@ -43,7 +44,7 @@ property.float = function (options: FloatPropertyOptions = {}): PropertyDecorato
   };
 };
 
-property.dds = function (type: () => DDSClass, options: Omit<DDSPropertyOptions, "type"> = {}): PropertyDecorator
+property.dds = function (type: () => DDSClass<any>, options: Omit<DDSPropertyOptions, "type"> = {}): PropertyDecorator
 {
   return (target, propertyKey) =>
   {

@@ -1,6 +1,8 @@
 import { Beatmap } from "./beatmap/Beatmap";
 import { BeatmapDifficulty } from "./beatmap/BeatmapDifficulty.ts";
 import { BeatmapMetadata } from "./beatmap/BeatmapMetadata";
+import { HitObject } from "./beatmap/HitObject";
+import { HitObjects } from "./beatmap/HitObjects";
 import { UnisonRuntime } from "./runtime/UnisonRuntime.ts";
 
 const runtime = new UnisonRuntime({
@@ -9,20 +11,19 @@ const runtime = new UnisonRuntime({
     Beatmap,
     BeatmapDifficulty,
     BeatmapMetadata,
+    HitObjects,
+    HitObject,
   ],
 });
 
 const beatmap = runtime.entryPoint;
 
-beatmap.difficulty.approachRate = 11;
+expect(beatmap.hitObjects.length).toBe(0);
 
-runtime.history.commit();
+beatmap.hitObjects.add(new HitObject());
+
+expect(beatmap.hitObjects.length).toBe(1);
+
 runtime.history.undo();
 
-console.log(beatmap.difficulty.approachRate);
-
-beatmap.difficulty.approachRate = 9;
-
-runtime.history.redo();
-
-console.log(beatmap.difficulty.approachRate);
+expect(beatmap.hitObjects.length).toBe(0);

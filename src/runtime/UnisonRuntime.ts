@@ -32,12 +32,17 @@ export class UnisonRuntime<T extends DDS = DDS>
 
   private readonly _logger = unisonLogger.getSubLogger();
 
+  public readonly encoder: UnisonEncoder;
+
   public constructor(options: UnisonRuntimeOptions<T>)
   {
     super();
 
     this.entryPoint = options.entryPoint;
     this._typeRegistry = new DDSFactoryRegistry(options.ddsTypes);
+
+    this.encoder = new UnisonEncoder();
+    this.encoder.onHandleEncode = dds => this._onHandleEncoded(dds);
 
     this._attachRecursive(options.entryPoint);
 
@@ -102,13 +107,18 @@ export class UnisonRuntime<T extends DDS = DDS>
 
   private _validate()
   {
+    const missingFactories = new Set<string>();
+
     for (const entry of [...this._channels.values()])
     {
       const factory = this._typeRegistry.getFactory(entry.dds.attributes.type);
 
       if (!factory)
-        throw new Error(`Could not find factory for type "${entry.dds.attributes.type}"`);
+        missingFactories.add(entry.dds.attributes.type);
     }
+
+    if (missingFactories.size > 0)
+      throw new Error(`Could not find factory for types ${[...missingFactories].map(type => `"${type}"`).join(", ")}`);
   }
 
   public createSummary()
@@ -147,5 +157,16 @@ export class UnisonRuntime<T extends DDS = DDS>
   public opSubmitted(dds: DDS, op: unknown, undoOp: unknown)
   {
     this.emit("localOp", dds, op, undoOp);
+  }
+
+  private _onHandleEncoded(dds: DDS)
+  {
+    this.ensureAttached(dds);
+  }
+
+  public ensureAttached(dds: DDS)
+  {
+    if (!dds.isAttached)
+      this._attach(dds);
   }
 }

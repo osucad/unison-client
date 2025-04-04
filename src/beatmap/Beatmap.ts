@@ -3,6 +3,7 @@ import { property } from "../dds/object/decorator";
 import { ObjectDDS } from "../dds/object/ObjectDDS";
 import { BeatmapDifficulty } from "./BeatmapDifficulty";
 import { BeatmapMetadata } from "./BeatmapMetadata";
+import { HitObjects } from "./HitObjects";
 
 export class Beatmap extends ObjectDDS
 {
@@ -20,4 +21,7 @@ export class Beatmap extends ObjectDDS
 
   @property.dds(() => BeatmapDifficulty, { readonly: true })
   public difficulty = new BeatmapDifficulty();
+
+  @property.dds(() => HitObjects)
+  public hitObjects = new HitObjects();
 }

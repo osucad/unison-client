@@ -29,9 +29,6 @@ export abstract class DDS<TEvents extends DDSEventsBase = any> extends EventEmit
     this.logger = createDDSLogger(this);
   }
 
-  private _runtime: UnisonRuntime | null = null;
-  private _deltas: DeltaChannel | null = null;
-
   private readonly _hasStaticId: boolean;
 
   public get isAttached(): boolean
@@ -47,10 +44,20 @@ export abstract class DDS<TEvents extends DDSEventsBase = any> extends EventEmit
 
   // #region Lifecycle
 
+  protected _runtime: UnisonRuntime | null = null;
+  protected _deltas: DeltaChannel | null = null;
+
+  protected get encoder()
+  {
+    return this._runtime?.encoder;
+  }
+
   public attach(runtime: UnisonRuntime, deltas: DeltaChannel): void
   {
     this._runtime = runtime;
     this._deltas = deltas;
+
+    this.connectDeltaChannel(deltas);
 
     this.logger.debug("attached dds");
   }
@@ -70,6 +77,10 @@ export abstract class DDS<TEvents extends DDSEventsBase = any> extends EventEmit
   public abstract createSummary(encoder: IUnisonEncoder): unknown;
 
   public abstract load(content: unknown, decoder: IUnisonDecoder): void;
-
   // #endregion
+
+  protected submitLocalOp(op: unknown, undoOp: unknown)
+  {
+    this._deltas?.submitLocalOp(op, undoOp);
+  }
 }
