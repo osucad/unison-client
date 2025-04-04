@@ -2,7 +2,9 @@ import type { DDS } from "../dds/DDS.ts";
 import type { UnisonRuntime } from "../runtime/UnisonRuntime.ts";
 import type { IHistoryEntry } from "./IHistoryEntry.ts";
 import { EventEmitter } from "eventemitter3";
+import { unisonLogger } from "../logger";
 import { nn } from "../utils/nn.ts";
+import { pluralize } from "../utils/pluralize";
 import { TransactionBuilder } from "./TransactionBuilder.ts";
 
 export interface HistoryEvents
@@ -18,6 +20,10 @@ export interface HistoryEvents
 export class DocumentHistory extends EventEmitter<HistoryEvents>
 {
   private readonly _runtime: UnisonRuntime;
+
+  private readonly _logger = unisonLogger.getSubLogger({
+    name: "history",
+  });
 
   private _currentTransaction = new TransactionBuilder();
 
@@ -51,8 +57,12 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
 
     this.emit("commit", this._currentTransaction);
 
+    const opCount = this._currentTransaction.entries.length;
+
     this._undoStack.push(this._currentTransaction.entries);
     this._currentTransaction = new TransactionBuilder();
+
+    this._logger.debug(opCount, `${pluralize(opCount, "change", "changes")} committed`);
 
     return true;
   }
@@ -67,6 +77,8 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
     this.emit("beforeUndo");
 
     const transaction = this._undoStack.pop()!;
+
+    this._logger.debug(`undoing transactions with`, transaction.length, pluralize(transaction.length, "change", "changes"));
 
     this._isUndoing = true;
 
@@ -99,6 +111,8 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
 
     const transaction = this._redoStack.pop()!;
 
+    this._logger.debug(`redoing transactions with`, transaction.length, pluralize(transaction.length, "change", "changes"));
+
     for (const entry of transaction)
       this._applyOp(entry.id, entry.undoOp);
 
@@ -125,6 +139,9 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
     this._currentTransaction.addEntry(nn(dds.id), undoOp);
 
     if (!this._isUndoing && this._redoStack.length > 0)
+    {
+      this._logger.debug("clearing redo stack on op submitted by", dds.attributes.type, `[${dds.id}]`);
       this._redoStack = [];
+    }
   }
 }
