@@ -1,5 +1,6 @@
 export interface IHistoryEntry
 {
-  readonly id: string;
+  readonly target: string;
   readonly undoOp: unknown;
+  readonly key?: string;
 }

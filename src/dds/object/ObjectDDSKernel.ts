@@ -8,6 +8,10 @@ import { UnisonDecoder } from "../../serialization/UnisonDecoder.ts";
 import { UnisonEncoder } from "../../serialization/UnisonEncoder.ts";
 import { getPropertyMetadata } from "./decorator";
 
+export interface IObjectMessage extends Record<string, unknown>
+{
+}
+
 export class ObjectDDSKernel implements IDeltaHandler
 {
   public readonly properties: readonly Property[];
@@ -84,7 +88,7 @@ export class ObjectDDSKernel implements IDeltaHandler
     const op = { [property.key]: newValue };
     const undoOp = { [property.key]: previousValue };
 
-    this._deltas!.submitLocalOp(op, undoOp);
+    this._deltas!.submitLocalOp({ op, undoOp });
     this._logger.trace("local op submitted", { op, undoOp });
   }
 

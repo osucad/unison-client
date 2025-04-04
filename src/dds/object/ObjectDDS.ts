@@ -5,6 +5,7 @@ import type { DDSEvents } from "../DDS";
 import type { DDSAttributes } from "../DDSAttributes";
 import { DDS } from "../DDS";
 import { ObjectDDSKernel } from "./ObjectDDSKernel";
+import { objectHistoryHandler } from "./objectHistoryHandler";
 import { toProxy } from "./proxy.ts";
 
 export type ObjectDDSSummary = Record<string, unknown>;
@@ -47,4 +48,6 @@ export abstract class ObjectDDS extends DDS<ObjectDDSEvents>
   {
     this._kernel.load(content as ObjectDDSSummary, decoder);
   }
+
+  public override readonly deltaMergeHandler = objectHistoryHandler;
 }

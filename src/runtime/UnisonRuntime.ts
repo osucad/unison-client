@@ -1,6 +1,7 @@
 import type { DDS } from "../dds/DDS";
 import type { IObjectResolver } from "../serialization/IObjectResolver";
 import type { IDocumentSummary } from "./IDocumentSummary.ts";
+import type { ILocalOpEvent } from "./ILocalOpEvent";
 import type { DDSFactoryOrClass } from "./TypeRegistry.ts";
 import { EventEmitter } from "eventemitter3";
 import { DocumentHistory } from "../history/DocumentHistory.ts";
@@ -18,7 +19,7 @@ export interface UnisonRuntimeOptions<T extends DDS>
 
 export class UnisonRuntime<T extends DDS = DDS>
   extends EventEmitter<{
-    localOp(dds: DDS, op: unknown, undoOp: unknown): void;
+    localOp(dds: DDS, event: ILocalOpEvent): void;
   }>
   implements IObjectResolver
 {
@@ -154,9 +155,9 @@ export class UnisonRuntime<T extends DDS = DDS>
     return summary;
   }
 
-  public opSubmitted(dds: DDS, op: unknown, undoOp: unknown)
+  public opSubmitted(dds: DDS, event: ILocalOpEvent)
   {
-    this.emit("localOp", dds, op, undoOp);
+    this.emit("localOp", dds, event);
   }
 
   private _onHandleEncoded(dds: DDS)

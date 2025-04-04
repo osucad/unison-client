@@ -1,5 +1,7 @@
 import type { Logger } from "tslog";
+import type { IDeltaMergeHandler } from "../history/IDeltaMergeHandler";
 import type { DeltaChannel } from "../runtime/DeltaChannel.ts";
+import type { ILocalOpEvent } from "../runtime/ILocalOpEvent";
 import type { UnisonRuntime } from "../runtime/UnisonRuntime.ts";
 import type { IUnisonDecoder, IUnisonEncoder } from "../serialization/types";
 import type { DDSAttributes } from "./DDSAttributes";
@@ -79,8 +81,10 @@ export abstract class DDS<TEvents extends DDSEventsBase = any> extends EventEmit
   public abstract load(content: unknown, decoder: IUnisonDecoder): void;
   // #endregion
 
-  protected submitLocalOp(op: unknown, undoOp: unknown)
+  protected submitLocalOp(event: ILocalOpEvent)
   {
-    this._deltas?.submitLocalOp(op, undoOp);
+    this._deltas?.submitLocalOp(event);
   }
+
+  public deltaMergeHandler?: IDeltaMergeHandler;
 }

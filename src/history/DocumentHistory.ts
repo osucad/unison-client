@@ -1,10 +1,11 @@
 import type { DDS } from "../dds/DDS.ts";
+import type { ILocalOpEvent } from "../runtime/ILocalOpEvent";
 import type { UnisonRuntime } from "../runtime/UnisonRuntime.ts";
 import type { IHistoryEntry } from "./IHistoryEntry.ts";
 import { EventEmitter } from "eventemitter3";
 import { unisonLogger } from "../logger";
-import { nn } from "../utils/nn.ts";
 import { pluralize } from "../utils/pluralize";
+import { defaultDeltaMergeHandler } from "./defaultDeltaMergeHandler";
 import { TransactionBuilder } from "./TransactionBuilder.ts";
 
 export interface HistoryEvents
@@ -83,7 +84,7 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
     this._isUndoing = true;
 
     for (const entry of transaction)
-      this._applyOp(entry.id, entry.undoOp);
+      this._applyOp(entry.target, entry.undoOp);
 
     this._isUndoing = false;
 
@@ -114,7 +115,7 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
     this._logger.debug(`redoing transactions with`, transaction.length, pluralize(transaction.length, "change", "changes"));
 
     for (const entry of transaction)
-      this._applyOp(entry.id, entry.undoOp);
+      this._applyOp(entry.target, entry.undoOp);
 
     this._isUndoing = false;
 
@@ -134,9 +135,11 @@ export class DocumentHistory extends EventEmitter<HistoryEvents>
     this._runtime.getChannel(id)?.replayOp(op);
   }
 
-  private _opSubmitted(dds: DDS, _: unknown, undoOp: unknown)
+  private _opSubmitted(dds: DDS, event: ILocalOpEvent)
   {
-    this._currentTransaction.addEntry(nn(dds.id), undoOp);
+    const handler = dds.deltaMergeHandler ?? defaultDeltaMergeHandler;
+
+    handler.addToTransaction(this._currentTransaction, dds, event);
 
     if (!this._isUndoing && this._redoStack.length > 0)
     {

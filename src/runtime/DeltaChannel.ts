@@ -1,4 +1,5 @@
 import type { DDS } from "../dds/DDS.ts";
+import type { ILocalOpEvent } from "./ILocalOpEvent";
 import type { UnisonRuntime } from "./UnisonRuntime.ts";
 
 export interface IDeltaHandler
@@ -22,9 +23,9 @@ export class DeltaChannel
     this._handler = handler;
   }
 
-  public submitLocalOp(op: unknown, undoOp: unknown)
+  public submitLocalOp(event: ILocalOpEvent)
   {
-    this.runtime.opSubmitted(this.dds, op, undoOp);
+    this.runtime.opSubmitted(this.dds, event);
   }
 
   public replayOp(op: unknown)
