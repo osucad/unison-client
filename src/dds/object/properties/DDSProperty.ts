@@ -1,13 +1,12 @@
 import type { EncodedHandle, IUnisonDecoder, IUnisonEncoder } from "../../../serialization/types";
 import type { DDS } from "../../DDS";
+import type { DDSClass } from "../../DDSFactory";
 import type { PropertyOptions } from "./Property";
 import { Property } from "./Property";
 
-export type DDSClass = abstract new (...args: any[]) => DDS<any>;
-
 export interface DDSPropertyOptions extends PropertyOptions<DDS>
 {
-  type: () => DDSClass;
+  type: () => DDSClass<DDS>;
 }
 
 export class DDSProperty extends Property<DDS>
@@ -19,12 +18,12 @@ export class DDSProperty extends Property<DDS>
     this.type = options.type;
   }
 
-  public readonly type: () => DDSClass;
+  public readonly type: () => DDSClass<any>;
 
   public override restrictValue(value: DDS): DDS
   {
     if (!(value instanceof this.type()))
-      throw new Error(`Expected value of type ${this.type()}, but got ${value} instead`);
+      throw new Error(`Expected value of type ${this.type().attributes.type}, but got ${value.attributes.type} instead`);
 
     return super.restrictValue(value);
   }
