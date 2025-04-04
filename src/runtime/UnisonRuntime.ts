@@ -4,6 +4,7 @@ import type { IDocumentSummary } from "./IDocumentSummary.ts";
 import type { DDSFactoryOrClass } from "./TypeRegistry.ts";
 import { EventEmitter } from "eventemitter3";
 import { DocumentHistory } from "../history/DocumentHistory.ts";
+import { unisonLogger } from "../logger";
 import { UnisonEncoder } from "../serialization/UnisonEncoder.ts";
 import { DeltaChannel } from "./DeltaChannel.ts";
 import { DDSFactoryRegistry } from "./TypeRegistry.ts";
@@ -28,6 +29,8 @@ export class UnisonRuntime<T extends DDS = DDS>
   private readonly _channels = new Map<string, DeltaChannel>();
 
   private readonly _typeRegistry: DDSFactoryRegistry;
+
+  private readonly _logger = unisonLogger.getSubLogger();
 
   public constructor(options: UnisonRuntimeOptions<T>)
   {
