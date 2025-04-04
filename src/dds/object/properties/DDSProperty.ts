@@ -3,7 +3,7 @@ import type { DDS } from "../../DDS";
 import type { PropertyOptions } from "./Property";
 import { Property } from "./Property";
 
-export type DDSClass = abstract new (...args: any[]) => DDS;
+export type DDSClass = abstract new (...args: any[]) => DDS<any>;
 
 export interface DDSPropertyOptions extends PropertyOptions<DDS>
 {

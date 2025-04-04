@@ -20,8 +20,7 @@
   },
   "dependencies": {
     "eventemitter3": "^5.0.1",
-    "reflect-metadata": "^0.2.2",
-    "tiny-typed-emitter": "^2.1.0"
+    "reflect-metadata": "^0.2.2"
   },
   "packageManager": "pnpm@8.15.5+sha1.a58c038faac410c947dbdb93eb30994037d0fce2"
 }

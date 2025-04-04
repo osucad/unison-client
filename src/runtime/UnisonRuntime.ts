@@ -12,6 +12,7 @@ export interface UnisonRuntimeOptions<T extends DDS>
 {
   readonly entryPoint: T;
   readonly ddsTypes: readonly DDSFactoryOrClass[];
+  readonly validate?: boolean;
 }
 
 export class UnisonRuntime<T extends DDS = DDS>
@@ -37,7 +38,8 @@ export class UnisonRuntime<T extends DDS = DDS>
 
     this._attachRecursive(options.entryPoint);
 
-    this._validate();
+    if (options.validate !== false)
+      this._validate();
   }
 
   public getObject(id: string): DDS | null

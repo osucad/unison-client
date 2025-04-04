@@ -54,9 +54,14 @@ export class ObjectDDSKernel implements IDeltaHandler
     if (property.readonly)
       throw new Error(`${property.key} is readonly`);
 
+    let previousValue = Reflect.get(this.target, property.key);
+
     newValue = property.restrictValue(newValue);
 
-    let previousValue = this._setValue(property, newValue);
+    if (property.equals(newValue, previousValue))
+      return;
+
+    this._setValue(property, newValue);
 
     if (!this._runtime)
       return;
@@ -72,19 +77,20 @@ export class ObjectDDSKernel implements IDeltaHandler
     this._deltas!.submitLocalOp(op, undoOp);
   }
 
-  private _setValue(property: Property, newValue: unknown): any
+  private _setValue(property: Property, newValue: unknown)
   {
     const previousValue = Reflect.get(this.target, property.key);
 
     Reflect.set(this.target, property.key, newValue);
 
-    return previousValue;
+    this.target.emit("propertyChanged", property.key, newValue, previousValue);
   }
 
   public attach(runtime: UnisonRuntime, deltas: DeltaChannel)
   {
     this._runtime = runtime;
     this._deltas = deltas;
+
     deltas.setHandler(this);
   }
 

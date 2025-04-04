@@ -1,5 +1,6 @@
 import { Beatmap } from "./beatmap/Beatmap";
 import { BeatmapDifficulty } from "./beatmap/BeatmapDifficulty.ts";
+import { BeatmapMetadata } from "./beatmap/BeatmapMetadata";
 import { UnisonRuntime } from "./runtime/UnisonRuntime.ts";
 
 const runtime = new UnisonRuntime({
@@ -7,17 +8,22 @@ const runtime = new UnisonRuntime({
   ddsTypes: [
     Beatmap,
     BeatmapDifficulty,
+    BeatmapMetadata,
   ],
 });
 
 const beatmap = runtime.entryPoint;
 
-beatmap.difficulty.approachRate = 9.2;
+beatmap.difficulty.on("propertyChanged", (key, value, previous) => console.log("property changed", key, previous, "->", value));
+
+beatmap.difficulty.approachRate = 11;
 
 runtime.history.commit();
 runtime.history.undo();
 
 console.log(beatmap.difficulty.approachRate);
+
+beatmap.difficulty.approachRate = 9;
 
 runtime.history.redo();
 

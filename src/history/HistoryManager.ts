@@ -1,10 +1,21 @@
 import type { DDS } from "../dds/DDS.ts";
 import type { UnisonRuntime } from "../runtime/UnisonRuntime.ts";
 import type { IHistoryEntry } from "./IHistoryEntry.ts";
+import { EventEmitter } from "eventemitter3";
 import { nn } from "../utils/nn.ts";
 import { TransactionBuilder } from "./TransactionBuilder.ts";
 
-export class HistoryManager
+export interface HistoryEvents
+{
+  commit: (transaction: TransactionBuilder) => void;
+
+  undo: () => void;
+  redo: () => void;
+  beforeUndo: () => void;
+  beforeRedo: () => void;
+}
+
+export class HistoryManager extends EventEmitter<HistoryEvents>
 {
   private readonly _runtime: UnisonRuntime;
 
@@ -15,19 +26,30 @@ export class HistoryManager
 
   private _isUndoing = false;
 
-  private _mode: "default" | "undoing" | "redoing" = "default";
-
   public constructor(runtime: UnisonRuntime)
   {
+    super();
     this._runtime = runtime;
 
     runtime.on("localOp", this._opSubmitted, this);
+  }
+
+  public get canUndo()
+  {
+    return this._undoStack.length > 0;
+  }
+
+  public get canRedo()
+  {
+    return this._redoStack.length > 0;
   }
 
   public commit(): boolean
   {
     if (this._currentTransaction.isEmpty)
       return false;
+
+    this.emit("commit", this._currentTransaction);
 
     this._undoStack.push(this._currentTransaction.entries);
     this._currentTransaction = new TransactionBuilder();
@@ -41,6 +63,8 @@ export class HistoryManager
 
     if (this._undoStack.length === 0)
       return false;
+
+    this.emit("beforeUndo");
 
     const transaction = this._undoStack.pop()!;
 
@@ -57,6 +81,8 @@ export class HistoryManager
       this._currentTransaction = new TransactionBuilder();
     }
 
+    this.emit("undo");
+
     return true;
   }
 
@@ -68,6 +94,8 @@ export class HistoryManager
       return false;
 
     this._isUndoing = true;
+
+    this.emit("beforeRedo");
 
     const transaction = this._redoStack.pop()!;
 
@@ -81,6 +109,8 @@ export class HistoryManager
       this._undoStack.push(this._currentTransaction.entries);
       this._currentTransaction = new TransactionBuilder();
     }
+
+    this.emit("redo");
 
     return true;
   }

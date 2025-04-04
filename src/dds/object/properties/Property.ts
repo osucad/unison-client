@@ -29,4 +29,9 @@ export class Property<T = any>
   {
     return value as T;
   }
+
+  public equals(a: T, b: T): boolean
+  {
+    return a === b;
+  }
 }
