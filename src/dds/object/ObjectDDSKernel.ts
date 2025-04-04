@@ -1,3 +1,4 @@
+import type { Logger } from "tslog";
 import type { DeltaChannel, IDeltaHandler } from "../../runtime/DeltaChannel.ts";
 import type { UnisonRuntime } from "../../runtime/UnisonRuntime.ts";
 import type { IUnisonDecoder, IUnisonEncoder } from "../../serialization/types";
@@ -13,10 +14,12 @@ export class ObjectDDSKernel implements IDeltaHandler
 
   private _runtime: UnisonRuntime | null = null;
   private _deltas: DeltaChannel | null = null;
+  private _logger: Logger<any>;
 
   public constructor(public readonly target: ObjectDDS)
   {
     this.properties = getPropertyMetadata(target);
+    this._logger = target.logger;
   }
 
   public createSummary(encoder: IUnisonEncoder): ObjectDDSSummary
@@ -59,7 +62,14 @@ export class ObjectDDSKernel implements IDeltaHandler
     newValue = property.restrictValue(newValue);
 
     if (property.equals(newValue, previousValue))
+    {
+      this._logger.trace("Ignored property change that would not have an effect", {
+        key: property.key,
+        newValue,
+        previousValue,
+      });
       return;
+    }
 
     this._setValue(property, newValue);
 
@@ -75,6 +85,7 @@ export class ObjectDDSKernel implements IDeltaHandler
     const undoOp = { [property.key]: previousValue };
 
     this._deltas!.submitLocalOp(op, undoOp);
+    this._logger.trace("local op submitted", { op, undoOp });
   }
 
   private _setValue(property: Property, newValue: unknown)
@@ -97,6 +108,8 @@ export class ObjectDDSKernel implements IDeltaHandler
   public replayOp(message: unknown)
   {
     const op = message as Record<string, unknown>;
+
+    this._logger.trace("replaying op", op);
 
     for (const key in op)
     {
