@@ -15,7 +15,7 @@ export interface HistoryEvents
   beforeRedo: () => void;
 }
 
-export class HistoryManager extends EventEmitter<HistoryEvents>
+export class DocumentHistory extends EventEmitter<HistoryEvents>
 {
   private readonly _runtime: UnisonRuntime;
 

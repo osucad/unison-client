@@ -3,7 +3,7 @@ import type { IObjectResolver } from "../serialization/IObjectResolver";
 import type { IDocumentSummary } from "./IDocumentSummary.ts";
 import type { DDSFactoryOrClass } from "./TypeRegistry.ts";
 import { EventEmitter } from "eventemitter3";
-import { HistoryManager } from "../history/HistoryManager.ts";
+import { DocumentHistory } from "../history/DocumentHistory.ts";
 import { UnisonEncoder } from "../serialization/UnisonEncoder.ts";
 import { DeltaChannel } from "./DeltaChannel.ts";
 import { DDSFactoryRegistry } from "./TypeRegistry.ts";
@@ -23,7 +23,7 @@ export class UnisonRuntime<T extends DDS = DDS>
 {
   public readonly entryPoint: T;
 
-  public readonly history = new HistoryManager(this);
+  public readonly history = new DocumentHistory(this);
 
   private readonly _channels = new Map<string, DeltaChannel>();
 
