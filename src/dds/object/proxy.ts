@@ -12,13 +12,16 @@ export function toProxy(dds: ObjectDDS)
   return new Proxy(dds, {
     set(target: ObjectDDS, p: string | symbol, newValue: any, receiver: any): boolean
     {
-      const property = propertyMap.get(p as string);
-
-      if (property !== undefined)
+      if (target.isAttached)
       {
-        kernel.setValue(property, newValue);
+        const property = propertyMap.get(p as string);
 
-        return true;
+        if (property !== undefined)
+        {
+          kernel.setValue(property, newValue);
+
+          return true;
+        }
       }
 
       return Reflect.set(target, p, newValue, receiver);
