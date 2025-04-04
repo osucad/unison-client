@@ -61,10 +61,14 @@ export class UnisonRuntime<T extends DDS = DDS>
     const trackedObjects = new Set<DDS>();
     const remainingObjects: DDS[] = [dds];
 
-    encoder.onHandleEncoded = (obj) =>
+    dds.id ??= crypto.randomUUID();
+
+    encoder.onHandleEncode = (obj) =>
     {
       if (trackedObjects.has(obj))
         return;
+
+      obj.id ??= crypto.randomUUID();
 
       trackedObjects.add(obj);
       remainingObjects.push(obj);
@@ -113,7 +117,7 @@ export class UnisonRuntime<T extends DDS = DDS>
     const trackedObjects = new Set<DDS>();
     const remainingObjects: DDS[] = [this.entryPoint];
 
-    encoder.onHandleEncoded = (obj) =>
+    encoder.onHandleEncode = (obj) =>
     {
       if (trackedObjects.has(obj))
         return;
@@ -130,8 +134,6 @@ export class UnisonRuntime<T extends DDS = DDS>
     while (remainingObjects.length > 0)
     {
       const current = remainingObjects.shift()!;
-
-      this._attach(current);
 
       summary.entries[current.id!] = {
         attributes: current.attributes,

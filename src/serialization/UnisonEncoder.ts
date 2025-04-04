@@ -15,7 +15,7 @@ export function encodeHandle(value: DDS): EncodedHandle
 
 export class UnisonEncoder implements IUnisonEncoder
 {
-  public onHandleEncoded?: (dds: DDS) => void;
+  public onHandleEncode?: (dds: DDS) => void;
 
   public encode(value: unknown): EncodedValue
   {
@@ -32,10 +32,8 @@ export class UnisonEncoder implements IUnisonEncoder
 
   public encodeHandle(dds: DDS): EncodedHandle
   {
-    const value = encodeHandle(dds);
+    this.onHandleEncode?.(dds);
 
-    this.onHandleEncoded?.(dds);
-
-    return value;
+    return encodeHandle(dds);
   }
 }

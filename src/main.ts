@@ -14,8 +14,6 @@ const runtime = new UnisonRuntime({
 
 const beatmap = runtime.entryPoint;
 
-beatmap.difficulty.on("propertyChanged", (key, value, previous) => console.log("property changed", key, previous, "->", value));
-
 beatmap.difficulty.approachRate = 11;
 
 runtime.history.commit();
