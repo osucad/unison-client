@@ -191,4 +191,73 @@ describe("ObjectDDS", () =>
     expect(foo.ref.id).toBe("foo2");
     expect(foo.ref.ref.id).toBe("foo1");
   });
+
+  it("enforces limits for int properties", () =>
+  {
+    class Foo extends ObjectDDS
+    {
+      constructor()
+      {
+        super({ type: "foo" });
+      }
+
+      @property.int({ min: -2, max: 3 })
+      count = 0;
+    }
+
+    const foo = new Foo();
+
+    expect(foo.count).toBe(0);
+
+    foo.count = 1;
+    expect(foo.count).toBe(1);
+
+    foo.count = 1.6;
+    expect(foo.count).toBe(2);
+
+    foo.count = 3;
+    expect(foo.count).toBe(3);
+
+    foo.count = 4;
+    expect(foo.count).toBe(3);
+
+    foo.count = -10;
+    expect(foo.count).toBe(-2);
+  });
+
+  it("enforces limits for float properties", () =>
+  {
+    class Foo extends ObjectDDS
+    {
+      constructor()
+      {
+        super({ type: "foo" });
+      }
+
+      @property.float({ min: -2, max: 3, precision: 2 })
+      count = 0;
+    }
+
+    const foo = new Foo();
+
+    expect(foo.count).toBe(0);
+
+    foo.count = 1;
+    expect(foo.count).toBe(1);
+
+    foo.count = 1.6;
+    expect(foo.count).toBe(1.6);
+
+    foo.count = 1.622;
+    expect(foo.count).toBe(1.6);
+
+    foo.count = 3;
+    expect(foo.count).toBe(3);
+
+    foo.count = 4;
+    expect(foo.count).toBe(3);
+
+    foo.count = -10;
+    expect(foo.count).toBe(-2);
+  });
 });

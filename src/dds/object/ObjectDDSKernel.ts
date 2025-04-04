@@ -54,7 +54,7 @@ export class ObjectDDSKernel implements IDeltaHandler
 
   public setValue(property: Property, newValue: unknown)
   {
-    if (property.readonly)
+    if (property.readonly && this.target.isAttached)
       throw new Error(`${property.key} is readonly`);
 
     let previousValue = Reflect.get(this.target, property.key);
